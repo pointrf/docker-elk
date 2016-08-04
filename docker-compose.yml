@@ -1,34 +1,41 @@
-elasticsearch:
-  image: elasticsearch:latest
-  command: elasticsearch -Des.network.host=0.0.0.0
-  volumes:
-    - ./esdata:/usr/share/elasticsearch/data:Z
+version: '2'
 
-logstash:
-  build: logstash/
-  command: logstash -f /etc/logstash/conf.d/logstash.conf
-  volumes:
-    - ./logstash/config:/etc/logstash/conf.d:ro,Z
-  ports:
-    - "5000:5000"
-    - "42185:42185/udp"
-    - "42185:42185/tcp"
-  links:
-    - elasticsearch
+services:
+  elasticsearch:
+    image: elasticsearch:latest
+    command: elasticsearch -Des.network.host=0.0.0.0
+    restart: unless-stopped
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data:Z
 
-kibana:
-  build: kibana/
-  volumes:
-    - ./kibana/config/:/opt/kibana/config/:ro,Z
-  links:
-    - elasticsearch
+  logstash:
+    build: logstash/
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    restart: unless-stopped
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d:ro,Z
+    ports:
+      - "5000:5000"
+      - "42185:42185/udp"
+      - "42185:42185/tcp"
+    depends_on:
+      - elasticsearch
 
-nginx:
-  image: nginx:latest
-  volumes:
-    - ./nginx/config:/etc/nginx/conf.d:ro,Z
-    - ./nginx/htpasswd.users:/etc/nginx/htpasswd.users:ro,Z
-  ports:
-    - "5601:5601"
-  links:
-    - kibana
+  kibana:
+    build: kibana/
+    restart: unless-stopped
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/:ro,Z
+    depends_on:
+      - elasticsearch
+
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx/config:/etc/nginx/conf.d:ro,Z
+      - ./nginx/htpasswd.users:/etc/nginx/htpasswd.users:ro,Z
+    ports:
+      - "5601:5601"
+    depends_on:
+      - kibana
