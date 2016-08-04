@@ -1,24 +1,34 @@
 elasticsearch:
   image: elasticsearch:latest
   command: elasticsearch -Des.network.host=0.0.0.0
-  ports:
-    - "9200:9200"
-    - "9300:9300"
+  volumes:
+    - ./esdata:/usr/share/elasticsearch/data:Z
 
 logstash:
   build: logstash/
   command: logstash -f /etc/logstash/conf.d/logstash.conf
   volumes:
-    - ./logstash/config:/etc/logstash/conf.d
+    - ./logstash/config:/etc/logstash/conf.d:ro,Z
   ports:
     - "5000:5000"
+    - "42185:42185/udp"
+    - "42185:42185/tcp"
   links:
     - elasticsearch
+
 kibana:
   build: kibana/
   volumes:
-    - ./kibana/config/:/opt/kibana/config/
+    - ./kibana/config/:/opt/kibana/config/:ro,Z
+  links:
+    - elasticsearch
+
+nginx:
+  image: nginx:latest
+  volumes:
+    - ./nginx/config:/etc/nginx/conf.d:ro,Z
+    - ./nginx/htpasswd.users:/etc/nginx/htpasswd.users:ro,Z
   ports:
     - "5601:5601"
   links:
-    - elasticsearch
+    - kibana
