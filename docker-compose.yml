@@ -6,7 +6,7 @@ services:
     command: elasticsearch -Des.network.host=0.0.0.0
     restart: unless-stopped
     volumes:
-      - ./esdata:/usr/share/elasticsearch/data:Z
+      - /data/elk-data:/usr/share/elasticsearch/data:Z
 
   logstash:
     build: logstash/
