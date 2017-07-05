@@ -36,6 +36,7 @@ services:
     volumes:
       - ./nginx/config:/etc/nginx/conf.d:ro,Z
       - ./nginx/htpasswd.users:/etc/nginx/htpasswd.users:ro,Z
+      - /data/certs:/etc/nginx/conf.d:ro,Z
     ports:
       - "5601:5601"
     depends_on:
