@@ -30,15 +30,15 @@ services:
     depends_on:
       - elasticsearch
 
-  nginx:
-    image: nginx:latest
+  nginx-ssl:
+    build: ./nginx
     restart: unless-stopped
     volumes:
       - ./nginx/config:/etc/nginx/conf.d:ro,Z
       - ./nginx/htpasswd.users:/etc/nginx/htpasswd.users:ro,Z
-      - /data/certs:/etc/nginx/conf.d:ro
+      - /data/certs:/etc/nginx/certs:ro
       - /var/log:/var/log/nginx
     ports:
-      - "5601:5601"
+      - "443:443"
     depends_on:
       - kibana
