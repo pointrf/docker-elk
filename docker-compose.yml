@@ -17,6 +17,7 @@ services:
       - ./logstash/config:/etc/logstash/conf.d:ro,Z
     ports:
       - "5000:5000"
+      - "5044:5044"
       - "42185:42185/udp"
       - "42185:42185/tcp"
     depends_on:
